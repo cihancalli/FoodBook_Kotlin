@@ -21,6 +21,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.zerdasoftware.foodbook.databinding.FragmentRecipeBinding
+import com.zerdasoftware.foodbook.model.RecipeModel
+import java.io.ByteArrayOutputStream
 
 
 class RecipeFragment : Fragment() {
@@ -72,6 +74,19 @@ class RecipeFragment : Fragment() {
     }
 
     fun save(view: View) {
+        val name = binding.foodNameEditText.text.toString()
+        val ingredients = binding.foodIngredientsEditText.text.toString()
+
+        if (selectedBitmap != null){
+            val smallBitmap = creatingSmallBitmap(selectedBitmap!!,300)
+            val outputStream = ByteArrayOutputStream()
+            smallBitmap.compress(Bitmap.CompressFormat.PNG,50,outputStream)
+            val byteArray = outputStream.toByteArray()
+
+            val recipeModel = RecipeModel(name,ingredients,byteArray)
+
+        }
+
 
     }
 
@@ -196,6 +211,26 @@ class RecipeFragment : Fragment() {
                     Toast.makeText(requireContext(), "İzin verilmedi", Toast.LENGTH_LONG).show()
                 }
             }
+    }
+
+    private fun creatingSmallBitmap(userSelectedBitmap: Bitmap,maximumSize:Int) : Bitmap {
+        var width = userSelectedBitmap.width
+        var height = userSelectedBitmap.height
+        val bitmapRatio :Double = width.toDouble()/height.toDouble()
+
+        if (bitmapRatio > 1){
+            //görsel yatay
+            width = maximumSize
+            val shortenedHeight = width / bitmapRatio
+            height = shortenedHeight.toInt()
+        } else {
+            //görsel dikey
+            height = maximumSize
+            val shortenedWidth = height / bitmapRatio
+            width = shortenedWidth.toInt()
+        }
+
+        return Bitmap.createScaledBitmap(userSelectedBitmap,width,height,true)
     }
 
 
