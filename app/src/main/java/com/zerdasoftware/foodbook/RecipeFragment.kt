@@ -1,10 +1,15 @@
 package com.zerdasoftware.foodbook
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import com.zerdasoftware.foodbook.databinding.FragmentRecipeBinding
 
 
@@ -56,10 +61,23 @@ class RecipeFragment : Fragment() {
 
     }
 
-
-
     fun selectImage (view: View) {
-
+        if (ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.READ_EXTERNAL_STORAGE )!= PackageManager.PERMISSION_GRANTED) {
+            //izin verilmemiş, izin istememiz gerekiyor.
+            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                //snackbar göstermemiz lazım, kullanıcıdan neden izin istediğimizi bir kez daha söyleyerek izin istememmiz lazım
+                Snackbar.make(view,"Galeriye ulaşıp görsel seçmemiz lazım!",Snackbar.LENGTH_INDEFINITE).setAction(
+                    "İzin Ver",
+                    View.OnClickListener {
+                        //izin isteyeceğiz
+                    }
+                ).show()
+            } else {
+                //izin isteyeceğiz
+            }
+        }else {
+            //izin verilmiş, galeriye gidebilirim
+        }
     }
 
 
