@@ -42,6 +42,7 @@ class RecipeFragment : Fragment() {
     private var selectedImage: Uri? = null
     private var selectedBitmap: Bitmap? = null
     private  val mDisposable = CompositeDisposable()
+    private var selectedRecipe : RecipeModel? = null
 
     private lateinit var db : RecipeDatabase
     private lateinit var recipeDAO: RecipeDAO
@@ -75,6 +76,7 @@ class RecipeFragment : Fragment() {
             val info = RecipeFragmentArgs.fromBundle(it).info
 
             if (info == "new") {
+                selectedRecipe = null
                 binding.deleteButton.visibility = View.GONE
                 binding.saveButton.visibility = View.VISIBLE
 
@@ -101,6 +103,7 @@ class RecipeFragment : Fragment() {
         binding.foodIngredientsEditText.setText(recipeModel.ingredient)
         val bitmap = BitmapFactory.decodeByteArray(recipeModel.image,0,recipeModel.image.size)
         binding.imageView.setImageBitmap(bitmap)
+        selectedRecipe = recipeModel
     }
 
     fun save(view: View) {
@@ -136,7 +139,14 @@ class RecipeFragment : Fragment() {
     }
 
     fun delete(view: View) {
-
+        if (selectedRecipe != null){
+            mDisposable.add(
+                recipeDAO.delete(recipe = selectedRecipe!!)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::handleResponseForInsert)
+            )
+        }
     }
 
     fun selectImage(view: View) {
