@@ -6,10 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.zerdasoftware.foodbook.databinding.FragmentListBinding
+import com.zerdasoftware.foodbook.model.RecipeModel
 import com.zerdasoftware.foodbook.roomdb.RecipeDAO
 import com.zerdasoftware.foodbook.roomdb.RecipeDatabase
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class ListFragment : Fragment() {
 
@@ -17,6 +22,7 @@ class ListFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var db : RecipeDatabase
     private lateinit var recipeDAO: RecipeDAO
+    private  val mDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +41,25 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.floatingActionButton.setOnClickListener { newAdd(it) }
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        getData()
+
+    }
+
+    private fun getData() {
+        mDisposable.add(
+            recipeDAO.getAll()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleResponse)
+        )
+    }
+
+    private fun handleResponse(recipes:List<RecipeModel>) {
+        recipes.forEach {
+            println(it.name)
+            println(it.ingredient)
+        }
     }
 
     fun newAdd(view: View){
@@ -45,6 +70,7 @@ class ListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        mDisposable.clear()
     }
 
 
