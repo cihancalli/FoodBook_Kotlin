@@ -10,8 +10,8 @@ data class RecipeModel (
     @ColumnInfo("name")
     var name:String,
 
-    @ColumnInfo("ingredients")
-    var ingredients:String,
+    @ColumnInfo("ingredient")
+    var ingredient:String,
 
     @ColumnInfo("image")
     var image:ByteArray
