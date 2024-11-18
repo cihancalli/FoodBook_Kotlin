@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
+import com.zerdasoftware.foodbook.adapter.RecipeAdapter
 import com.zerdasoftware.foodbook.databinding.FragmentListBinding
 import com.zerdasoftware.foodbook.model.RecipeModel
 import com.zerdasoftware.foodbook.roomdb.RecipeDAO
@@ -56,14 +57,12 @@ class ListFragment : Fragment() {
     }
 
     private fun handleResponse(recipes:List<RecipeModel>) {
-        recipes.forEach {
-            println(it.name)
-            println(it.ingredient)
-        }
+        val adapter = RecipeAdapter(recipes)
+        binding.recyclerView.adapter = adapter
     }
 
     fun newAdd(view: View){
-        val action = ListFragmentDirections.actionListFragmentToRecipeFragment(info = "new", id = 0)
+        val action = ListFragmentDirections.actionListFragmentToRecipeFragment(info = "new", id = -1)
         Navigation.findNavController(view).navigate(action)
     }
 

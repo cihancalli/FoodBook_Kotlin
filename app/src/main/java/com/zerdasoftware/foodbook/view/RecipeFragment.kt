@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -71,7 +72,6 @@ class RecipeFragment : Fragment() {
         binding.imageView.setOnClickListener { selectImage(it) }
 
         arguments?.let {
-            val id = RecipeFragmentArgs.fromBundle(it).id
             val info = RecipeFragmentArgs.fromBundle(it).info
 
             if (info == "new") {
@@ -83,8 +83,24 @@ class RecipeFragment : Fragment() {
             } else {
                 binding.deleteButton.visibility = View.VISIBLE
                 binding.saveButton.visibility = View.GONE
+                val id = RecipeFragmentArgs.fromBundle(it).id
+
+                mDisposable.add(
+                    recipeDAO.findById(id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::handleResponse)
+                )
+
             }
         }
+    }
+
+    private fun handleResponse(recipeModel: RecipeModel) {
+        binding.foodNameEditText.setText(recipeModel.name)
+        binding.foodIngredientsEditText.setText(recipeModel.ingredient)
+        val bitmap = BitmapFactory.decodeByteArray(recipeModel.image,0,recipeModel.image.size)
+        binding.imageView.setImageBitmap(bitmap)
     }
 
     fun save(view: View) {
@@ -104,7 +120,7 @@ class RecipeFragment : Fragment() {
               recipeDAO.insert(recipeModel)
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(this::handleResponse)
+              .subscribe(this::handleResponseForInsert)
           )
 
 
@@ -113,7 +129,7 @@ class RecipeFragment : Fragment() {
 
     }
 
-    private fun handleResponse() {
+    private fun handleResponseForInsert() {
         //bir önceki fragmenta dön
         val action = RecipeFragmentDirections.actionRecipeFragmentToListFragment()
         Navigation.findNavController(requireView()).navigate(action)
