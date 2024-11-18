@@ -1,4 +1,4 @@
-package com.zerdasoftware.foodbook
+package com.zerdasoftware.foodbook.view
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

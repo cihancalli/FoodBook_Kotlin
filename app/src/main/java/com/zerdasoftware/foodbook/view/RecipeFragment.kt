@@ -1,4 +1,4 @@
-package com.zerdasoftware.foodbook
+package com.zerdasoftware.foodbook.view
 
 import android.Manifest
 import android.content.Intent
