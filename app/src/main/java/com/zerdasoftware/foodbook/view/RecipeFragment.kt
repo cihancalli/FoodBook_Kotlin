@@ -19,9 +19,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.Navigation
+import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
 import com.zerdasoftware.foodbook.databinding.FragmentRecipeBinding
 import com.zerdasoftware.foodbook.model.RecipeModel
+import com.zerdasoftware.foodbook.roomdb.RecipeDAO
+import com.zerdasoftware.foodbook.roomdb.RecipeDatabase
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.ByteArrayOutputStream
 
 
@@ -33,10 +40,17 @@ class RecipeFragment : Fragment() {
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private var selectedImage: Uri? = null
     private var selectedBitmap: Bitmap? = null
+    private  val mDisposable = CompositeDisposable()
+
+    private lateinit var db : RecipeDatabase
+    private lateinit var recipeDAO: RecipeDAO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerLauncher()
+
+        db = Room.databaseBuilder(requireContext(),RecipeDatabase::class.java,"Recipes").build()
+        recipeDAO = db.recipeDAO()
     }
 
     override fun onCreateView(
@@ -85,9 +99,24 @@ class RecipeFragment : Fragment() {
 
             val recipeModel = RecipeModel(name,ingredients,byteArray)
 
+            //RxJava
+          mDisposable.add(
+              recipeDAO.insert(recipeModel)
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(this::handleResponse)
+          )
+
+
         }
 
 
+    }
+
+    private fun handleResponse() {
+        //bir önceki fragmenta dön
+        val action = RecipeFragmentDirections.actionRecipeFragmentToListFragment()
+        Navigation.findNavController(requireView()).navigate(action)
     }
 
     fun delete(view: View) {
